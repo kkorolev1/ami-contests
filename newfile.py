@@ -13,7 +13,7 @@ using namespace std;
 int main() {
     return 0;
 }
-    """
+"""
 
     with open(file + ".cpp", "w") as f:
         f.write(content)
