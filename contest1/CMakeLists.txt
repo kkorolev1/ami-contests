@@ -3,24 +3,27 @@ project(contest1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror --std=c++17 -g")
 
-add_executable(1 1.cpp)
-add_executable(2 2.cpp)
-add_executable(3 3.cpp)
+add_executable(A A.cpp)
+add_executable(B C.cpp)
+add_executable(C C.cpp)
 
-add_executable(4 4.cpp)
+add_executable(D D.cpp)
 
-add_executable(6 6.cpp)
+add_executable(F F.cpp)
 
-add_executable(7 7.cpp)
+add_executable(G G.cpp)
 
-add_executable(9 9.cpp)
+add_executable(I I.cpp)
 
-add_executable(10 10.cpp)
+add_executable(J J.cpp)
 
-add_executable(11 11.cpp)
+add_executable(K K.cpp)
 
-add_executable(12 12.cpp)
+add_executable(L L.cpp)
 
-add_executable(13 13.cpp)
+add_executable(M M.cpp)
 
-add_executable(5 5.cpp)
+add_executable(E E.cpp)
+
+add_executable(H H.cpp)
+add_executable(N N.cpp)
