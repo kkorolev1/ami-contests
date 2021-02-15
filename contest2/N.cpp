@@ -1,10 +1,15 @@
 #include <string>
 #include <string_view>
+#include <algorithm>
 
 bool CheckPalindrome(std::string_view str) {
     size_t n = str.size();
-    for (size_t i = 0; i < n / 2; ++i) {
-        if (str[i] != str[n - i - 1]) {
+    if (n == 0) {
+        return true;
+    }
+    size_t l = 0, r = n - 1;
+    while (l < r) {
+        if (str[l++] != str[r--]) {
             return false;
         }
     }
@@ -14,26 +19,25 @@ bool CheckPalindrome(std::string_view str) {
 size_t CountPalindromes(std::string_view str) {
     size_t ans = 0;
 
-    if (!str.empty()) {
-        size_t from = 0;
+    auto it = str.begin();
 
-        while (from != std::string_view::npos) {
-            size_t to = str.find(' ', from);
-            ans += CheckPalindrome(
-                    str.substr(from, (to != std::string::npos) ? (to - from) : to));
-            from = (to != std::string::npos) ? (to + 1) : to;
+    do {
+        auto next = std::find_if_not(it, str.end(), [](char c) { return isalpha(c); });
+
+        if (it != next) {
+            ans += CheckPalindrome(std::string_view(it, next - it));
         }
-    }
+
+        it = std::find_if(next, str.end(), [](char c){ return isalpha(c); });
+    } while (it != str.end());
 
     return ans;
 }
-
 
 #include <iostream>
 
 using namespace std;
 
 int main() {
-    cout << CountPalindromes("ab abba Aba aba") << "\n";
     return 0;
 }

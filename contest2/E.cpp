@@ -3,7 +3,7 @@
 using namespace std;
 
 int main() {
-    freopen("input.txt", "r", stdin);
+    // freopen("input.txt", "r", stdin);
     int m, n, k;
     cin >> m >> n >> k;
 
@@ -21,10 +21,10 @@ int main() {
 
         for (int dx = -1; dx <= 1; ++dx) {
             for (int dy = -1; dy <= 1; ++dy) {
-                int x = col + dy;
-                int y = row + dx;
+                int x = col + dx;
+                int y = row + dy;
 
-                if ((dy == dx) || (x < 0) || (y < 0) ||
+                if ((dx == 0 && dy == 0) || (x < 0) || (y < 0) ||
                     (x >= n) || (y >= m) || (field[y][x] == MINE_VAL))
                     continue;
 
