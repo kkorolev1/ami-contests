@@ -5,8 +5,6 @@
 class Date {
 public:
     Date(int _d, int _m, int _y) {
-        if (_y < 1970 || _y > 2099)
-            throw std::invalid_argument("Year is not in [1970; 2099]");
         if (_m < 1 || _m > 12)
             throw std::invalid_argument("Month is not in [1; 12]");
         if (_d < 1 || _d > daysInMonth(_m, _y))
@@ -50,11 +48,32 @@ public:
         return *this;
     }
 
+    Date operator+(int days) const {
+        int cur_year = y;
+
+        while (days >= 365) {
+            days -= 365 + isLeapYear(cur_year++);
+        }
+
+        int cur_month = m;
+
+
+    }
+
     int operator-(const Date& other) const {
-        
+        return dateToDays() - other.dateToDays();
     }
 
 private:
+    int dateToDays() const {
+        static const int base_year = 1970;
+        int days = 0;
+        for (int year = base_year; year <= y; ++year)
+            for (int month = 1; (year < y && month <= 12) || (month < m); ++month)
+                    days += daysInMonth(month, year);
+        return days + d;
+    }
+
     static bool isLeapYear(int y) {
         return (y % 400 == 0) || ((y % 100 != 0) && (y % 4 == 0));
     }
@@ -83,8 +102,8 @@ ostream& operator<<(ostream& os, const Date& date) {
 }
 
 int main() {
-    Date d(1, 3, 2021);
-    --d;
-    cout << d << "\n";
+    Date d(1, 1, 2021);
+    Date d2(21, 2, 2021);
+    cout << d2 - d << "\n";
     return 0;
 }
