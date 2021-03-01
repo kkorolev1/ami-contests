@@ -8,10 +8,12 @@ public:
     using TimePoint = decltype(std::chrono::high_resolution_clock::now());
 
     TimerGuard(std::string_view message = "", std::ostream& out = std::cout) :
-        mes_(message), os_(out), start_(std::chrono::high_resolution_clock::now()) {}
+        mes_(message), os_(out) {
+        start_ = std::chrono::high_resolution_clock::now();
+    }
 
     ~TimerGuard() {
-        auto diff = std::chrono::high_resolution_clock::now() - start_;
+        std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start_;
         os_ << mes_ << " " << diff.count();
     }
 
@@ -38,7 +40,7 @@ void FirstLongFunction() {
 
 int main() {
     {
-        TimerGuard timer("FirstLongFunction elapsed: ", std::cerr);
+        TimerGuard timer("FirstLongFunction elapsed:", std::cerr);
         FirstLongFunction();
     }
 

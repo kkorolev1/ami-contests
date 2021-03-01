@@ -22,7 +22,7 @@ using namespace std;
 
 int main() {
     std::vector<int> v{1, 1, 2, 10, 1, 0, 1, 2};
-    std::set<int> s{1, 2};
+    std::set<int> s{};
     size_t result = CountSubsegments(v.begin(), v.end(), s.cbegin(), s.cend());
     cout << result << "\n";
     return 0;

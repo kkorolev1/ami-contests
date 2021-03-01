@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(contest5)
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror --std=c++17 -g ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror --std=c++2a -g ${CMAKE_CXX_FLAGS}")
 
 
 add_executable(A A.cpp)
@@ -18,3 +18,5 @@ add_executable(K K.cpp)
 add_executable(M M.cpp)
 add_executable(N N.cpp)
 add_executable(P P.cpp)
+add_executable(L L.cpp)
+add_executable(O O.cpp)
