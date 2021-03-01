@@ -4,16 +4,11 @@
 using namespace std;
 
 struct LegacyDate {
-    int d, y, m;
+    int d, m, y;
 };
 
 class Date {
 public:
-
-    int DaysInYear(int year) const {
-        return 365 + IsLeap(year);
-    }
-
     Date(int _d, int _m, int _y) {
         if (_y < 1970 || _y > 2099)
             throw std::invalid_argument("Year is not in [1970; 2099]");
@@ -21,41 +16,19 @@ public:
             throw std::invalid_argument("Month is not in [1; 12]");
         if (_d < 1 || _d > daysInMonth(_m, _y))
             throw std::invalid_argument("Day is not valid for that month and year");
-        d = to_days(_d, _m, _y);
-    }
-
-    Date(int d) {
-
+        d = toDays(_d, _m, _y);
     }
 
     int GetDay() const {
-        auto [d, _, _] = to_day_month_year(d);
-        return day;
+        return toLegacy(d).d;
     }
 
     int GetMonth() const {
-        auto [day, month, year] = to_day_month_year(d);
-        return month;
+        return toLegacy(d).m;
     }
 
     int GetYear() const {
-        auto [day, month, year] = to_day_month_year(d);
-        return year;
-    }
-
-    std::tuple<int, int, int> to_day_month_year(int n) const {
-        int year = 1969;
-        while (DaysInYear(year) <= n) {
-            n -= DaysInYear(year);
-            ++year;
-        }
-        int month = 1;
-        while (DaysInMonth(month, year) <= n) {
-            n -= DaysInMonth(month, year);
-            ++month;
-        }
-        int day = n + 1;
-        return std::make_tuple(day, month, year);
+        return toLegacy(d).y;
     }
 
     Date operator+(int days) const {
@@ -79,25 +52,43 @@ public:
         --d;
         return *this;
     }
-private:
 
-    int to_days(int day, int month, int year) const {
-        int l = 0;
-        int r = 100000;
-        while (r - l > 1) {
-            int m = (r + l) / 2;
-            auto[da, mo, ye] = ToDate(m);
-            if (std::make_tuple(ye, mo, da) > std::make_tuple(year, month, day)) {
-                r = m;
-            } else {
-                l = m;
+private:
+    Date(int _d) : d(_d) {}
+
+    static LegacyDate toLegacy(int days) {
+        int year = 1970;
+
+        while (daysInYear(year) <= days) {
+            days -= daysInYear(year);
+            ++year;
+        }
+
+        int month = 1;
+        while (daysInMonth(month, year) <= days) {
+            days -= daysInMonth(month, year);
+            ++month;
+        }
+
+        return {days + 1, month, year};
+    }
+
+    static int toDays(int day, int month, int year) {
+        int days = day;
+        for (int y = 1970; y <= year; ++y) {
+            for (int m = 1; (y < year && m <= 12) || m < month; ++m) {
+                days += daysInMonth(m, y);
             }
         }
-        return l;
+        return days - 1;
     }
 
     static bool isLeapYear(int y) {
         return (y % 400 == 0) || ((y % 100 != 0) && (y % 4 == 0));
+    }
+
+    static int daysInYear(int y) {
+        return 365 + isLeapYear(y);
     }
 
     static int daysInMonth(int m, int y) {
@@ -111,12 +102,25 @@ private:
                                                    30, 31};
         return months[m - 1];
     }
+
 private:
     int d;
 };
 
 #include <iostream>
 
+#include <iomanip>
+using namespace std;
+
+ostream& operator<<(ostream& os, const Date& date) {
+    os << setw(2) << setfill('0') << date.GetDay();
+    os << "." << setw(2) << setfill('0') << date.GetMonth();
+    os << "." << setw(4) << setfill('0') << date.GetYear();
+    return os;
+}
+
 int main() {
+    Date d(1, 3, 2021);
+    cout << d << "\n";
     return 0;
 }
