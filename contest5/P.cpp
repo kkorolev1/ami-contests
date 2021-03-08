@@ -14,7 +14,7 @@ public:
 
     ~TimerGuard() {
         std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start_;
-        os_ << mes_ << " " << diff.count();
+        os_ << mes_ << " " << diff.count() << "\n";
     }
 
 private:
@@ -28,21 +28,20 @@ private:
 #include <random>
 using namespace std;
 
-void FirstLongFunction() {
+/*void FirstLongFunction() {
     vector<int> xs(10e6);
     random_device rd;
     mt19937 gen(rd());
     shuffle(xs.begin(), xs.end(), gen);
-    // while (next_permutation(xs.begin(), xs.end()));
-}
+}*/
 
 
 
-int main() {
+/*int main() {
     {
         TimerGuard timer("FirstLongFunction elapsed:", std::cerr);
         FirstLongFunction();
     }
 
     return 0;
-}
+} */
