@@ -11,11 +11,15 @@ public:
     // Генерирует исключение std::invalid_argument("some text") в случае,
     // если оба ключа пусты, либо один из ключей уже имеется в хранилище.
     void Insert(const std::optional<Key1>& key1,
+<<<<<<< HEAD
                 const std::optional<Key2>& key2, const Value& value) {
 
         if (!key1 && !key2)
             throw std::invalid_argument("key1 and key2 are empty");
 
+=======
+            const std::optional<Key2>& key2, const Value& value) {
+>>>>>>> bdbd84a5e364f9b8c48af57040351a9617c559d9
         std::shared_ptr<Value> valuePtr;
 
         if (key1) {
@@ -94,6 +98,5 @@ int main() {
     cout << bimap.GetBySecondaryKey("cshse-ami-999") << "\n";  // Fedorov Oleg
 
     bimap.Insert({14}, {"cshse-ami-999"}, {"Kirill", "Korolev"});
-
     return 0;
 }
