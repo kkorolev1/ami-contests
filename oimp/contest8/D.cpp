@@ -5,14 +5,14 @@ namespace impl {
     template <typename T>
     class List {
         struct Node;
-        using NodePtr = std::shared_ptr<Node>;
+        using NodePtr = Node*;
 
         struct Node {
             Node() = default;
             Node(const T& value) : value(value) {}
 
-            NodePtr prev;
-            NodePtr next;
+            NodePtr prev = nullptr;
+            NodePtr next = nullptr;
             std::optional<T> value;
         };
 
@@ -59,40 +59,72 @@ namespace impl {
             bool operator!=(const Iterator& other) const {
                 return node != other.node;
             }
+
+            NodePtr get() {
+                return node;
+            }
         };
+
+        void reset(Iterator first, Iterator last) {
+            auto it = first;
+
+            while (it != last) {
+                auto next = it;
+                ++next;
+                delete it.get();
+                it = next;
+            }
+        }
 
         NodePtr head;
         size_t sz;
 
     public:
-        List() {
-            auto dummyNode = std::make_shared<Node>();
-            head = dummyNode;
-            sz = 0;
-        }
+        List() : head(new Node()), sz(0) {}
 
         List(const List& other) : List() {
-            for (auto it = other.begin(); it != other.end(); ++it) {
-                push_back(*it);
+            try {
+                for (auto jt = other.begin(); jt != other.end(); ++jt) {
+                    push_back(*jt);
+                }
+            } catch (const std::exception& exc) {
+                reset(begin(), end());
+                head->prev = head->next = nullptr;
+                sz = 0;
+                throw exc;
             }
         }
 
-        ~List() = default;
+        ~List() {
+            reset(begin(), end());
+            delete head;
+        }
 
         List& operator=(const List& other) {
             if (this != &other) {
-                head->prev = head->next = nullptr;
-                sz = 0;
+                auto prevFirst = head->next;
+                auto prevLast = head->prev;
+                auto prevSize = sz;
 
-                for (auto it = other.begin(); it != other.end(); ++it) {
-                    push_back(*it);
+                try {
+                    head->prev = head->next = nullptr;
+                    sz = 0;
+                    for (auto jt = other.begin(); jt != other.end(); ++jt) {
+                        push_back(*jt);
+                    }
+                } catch (const std::exception& exc) {
+                    reset(begin(), end());
+                    head->prev = prevLast;
+                    head->next = prevFirst;
+                    sz = prevSize;
+                    throw exc;
                 }
             }
             return *this;
         }
 
         void push_back(const T& elem) {
-            auto node = std::make_shared<Node>(elem);
+            auto node = new Node(elem);
             if (!head->prev) {
                 head->next = node;
                 head->prev = node;
@@ -108,7 +140,7 @@ namespace impl {
         }
 
         void push_front(const T& elem) {
-            auto node = std::make_shared<Node>(elem);
+            auto node = new Node(elem);
             if (!head->next) {
                 head->next = node;
                 head->prev = node;
@@ -124,33 +156,25 @@ namespace impl {
         }
 
         void pop_back() {
-            if (head->prev) {
-                auto last = head->prev;
-                last->prev->next = head;
-                head->prev = last->prev;
-                --sz;
-            }
+            auto last = head->prev;
+            last->prev->next = head;
+            head->prev = last->prev;
+            last->prev = last->next = nullptr;
+            delete last;
+            --sz;
         }
 
         void pop_front() {
-            if (head->next) {
-                auto first = head->next;
-                first->next->prev = head;
-                head->next = first->next;
-                --sz;
-            }
+            auto first = head->next;
+            first->next->prev = head;
+            head->next = first->next;
+            first->prev = first->next = nullptr;
+            delete first;
+            --sz;
         }
 
         size_t size() const {
             return sz;
-        }
-
-        Iterator begin() {
-            return Iterator(head->next ? head->next : head);
-        }
-
-        Iterator end() {
-            return Iterator(head);
         }
 
         Iterator begin() const {
@@ -163,20 +187,45 @@ namespace impl {
     };
 }
 
-using List = impl::List<int>;
+// using List = impl::List<int>;
+using impl::List;
 
 #include <iostream>
+#include <list>
 
 using namespace std;
 
+struct A {
+    A() { cout << "A()\n"; }
+    A(const A&) { cout << "A(const A&)\n"; }
+    A(A&&) { cout << "A(A&&)\n"; }
+    ~A() { cout << "~A()\n"; }
+};
+
 int main() {
+    using ListA = List<A>;
+    using List = List<int>;
+    ListA lsta;
+    lsta.push_back(A());
+    lsta.push_back(A());
+    lsta.push_back(A());
+
+    try {
+        cout << "COPY CONSTRUCTOR\n";
+        ListA lstb = lsta;
+        lstb.pop_back();
+
+        cout << "OPERATOR=\n";
+        cout << "lsta.size() = " << lsta.size() << " lstb.size() = " << lstb.size() << "\n";
+        lsta = lstb;
+    } catch (...) {
+        cout << "EXCEPTION\n";
+    }
+
+    cout << "DESTRUCTORS 2\n";
+    return 0;
+
     List lst;
-    /*lst.push_back(1);
-    lst.push_back(2);
-    lst.push_back(3);
-    lst.pop_back();
-    lst.push_front(0);
-    */
     lst.push_front(4);
     lst.push_front(3);
     lst.push_front(2);
