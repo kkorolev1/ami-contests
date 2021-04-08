@@ -1,6 +1,0 @@
-C:/Users/kirill-korolev/ami/ami-contests/algo2/contest1/cmake-build-debug/CMakeFiles/A.dir
-C:/Users/kirill-korolev/ami/ami-contests/algo2/contest1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-C:/Users/kirill-korolev/ami/ami-contests/algo2/contest1/cmake-build-debug/CMakeFiles/B.dir
-C:/Users/kirill-korolev/ami/ami-contests/algo2/contest1/cmake-build-debug/CMakeFiles/C.dir
-C:/Users/kirill-korolev/ami/ami-contests/algo2/contest1/cmake-build-debug/CMakeFiles/D.dir
-C:/Users/kirill-korolev/ami/ami-contests/algo2/contest1/cmake-build-debug/CMakeFiles/edit_cache.dir
