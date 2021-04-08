@@ -1,3 +1,7 @@
 oimp/*/.idea/*
 oimp/*/cmake-build-debug/*
+algo1/*/.idea/*
+algo1/*/cmake-build-debug/*
+algo2/*/.idea/*
+algo2/*/cmake-build-debug/*
 .DS_Store
