@@ -5,40 +5,38 @@
 using namespace std;
 
 struct Graph {
-    Graph(int n) :
-            n(n), adj_matrix(n + 1, vector<int>(n + 1)), colors(n + 1) {}
+    Graph(int n) : n(n), adj_matrix(n + 1, vector<int>(n + 1)), visited(n + 1), from(n + 1, -1) {}
 
-    void add_edge(int u, int v) {
-        if (u != v) {
-            adj_matrix[u][v] = 1;
-        }
-    }
-
-    bool dfs(int v, int p) {
-        colors[v] = 1;
+    int dfs(int v) {
+        visited[v] = 1;
 
         for (int u = 1; u <= n; ++u) {
+            if (from[v] == u)
+                continue;
             if (adj_matrix[v][u]) {
-                if (u == p)
-                    continue;
-                if ((colors[u] == 1) || ((colors[u] == 0) && dfs(u, v))) {
-                    cycle.push_back(v);
-                    return true;
+                from[u] = v;
+                if (!visited[u]) {
+                    int cycle_v = dfs(u);
+                    if (cycle_v != -1)
+                        return cycle_v;
+                } else if (visited[u] == 1) {
+                    return u;
                 }
             }
         }
 
-        return false;
+        visited[v] = 2;
+        return -1;
     }
 
     int n;
-    vector<int> cycle;
-    vector<int> colors;
+    vector<int> from;
+    vector<int> visited;
     vector<vector<int>> adj_matrix;
 };
 
 int main() {
-    // freopen("input2.txt", "r", stdin);
+    freopen("input.txt", "r", stdin);
     int n;
     cin >> n;
 
@@ -46,24 +44,27 @@ int main() {
 
     for (int u = 1; u <= n; ++u) {
         for (int v = 1; v <= n; ++v) {
-            int has_edge;
-            cin >> has_edge;
-            if (has_edge)
-                g.add_edge(u, v);
+            cin >> g.adj_matrix[u][v];
+            g.adj_matrix[v][u] = g.adj_matrix[u][v];
         }
     }
 
     for (int v = 1; v <= n; ++v) {
-        if (!g.colors[v]) {
-            if (g.dfs(v, 0)) {
+        if (!g.visited[v]) {
+            int cycle_v = g.dfs(v);
+            if (cycle_v != -1) {
                 cout << "YES\n";
-                cout << g.cycle.size() << "\n";
 
-                for (int u : g.cycle) {
-                    cout << u << " ";
+                vector<int> cycle;
+                for (int u = g.from[cycle_v]; u != cycle_v; u = g.from[u]) {
+                    cycle.push_back(u);
                 }
+                cycle.push_back(cycle_v);
+                cout << cycle.size() << "\n";
 
-                cout << "\n";
+                for (int x : cycle) {
+                    cout << x << " ";
+                }
 
                 return 0;
             }
