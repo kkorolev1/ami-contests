@@ -1,36 +1,28 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
 struct Graph {
-    Graph(int n) : adj_list(n + 1), visited(n + 1) {}
+    Graph(int n) : adj_list(n + 1), depth(n + 1) {}
 
     void add_edge(int u, int v) {
-        if (u != v) {
-            adj_list[u].push_back(v);
-            adj_list[v].push_back(u);
-        }
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
     }
 
-    int dfs(int v, int& u) {
-        int d = 0;
-        visited[v] = true;
+    void dfs(int v, int p = 0) {
+        depth[v] = p != 0 ? depth[p] + 1 : 0;
 
         for (int neig : adj_list[v]) {
-            if (!visited[neig]) {
-                d = max(d, dfs(neig, u) + 1);
+            if (neig != p) {
+                dfs(neig, v);
             }
         }
-
-        if (d == 0) {
-            u = v;
-        }
-
-        return d;
     }
 
-    vector<bool> visited;
+    vector<int> depth;
     vector<vector<int>> adj_list;
 };
 
@@ -47,18 +39,12 @@ int main() {
         g.add_edge(u, v);
     }
 
-    int d = 0;
+    g.dfs(1, 0);
 
-    for (int v = 1; v <= n; ++v) {
-        if (!g.visited[v]) {
-            int u = 0;
-            g.dfs(v, u);
-            g.visited.assign(n + 1, false);
-            d = max(d, g.dfs(u, v));
-        }
-    }
+    int v = max_element(g.depth.begin(), g.depth.end()) - g.depth.begin();
+    g.dfs(v, 0);
 
-    cout << d << "\n";
+    cout << *max_element(g.depth.begin(), g.depth.end()) << "\n";
 
     return 0;
 }
