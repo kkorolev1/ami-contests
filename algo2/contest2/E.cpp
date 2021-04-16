@@ -5,47 +5,30 @@
 
 using namespace std;
 
-struct Edge {
-    int from, to, index;
-};
-
-vector<Edge> edges;
-vector<vector<int>> adj;
+using Edge = pair<int, int>;
+vector<vector<Edge>> adj;
 vector<int> visited;
 vector<int> depth;
 vector<int> up_depth;
 
-int neighbour(int edge_idx) {
-    return edges[edge_idx].to;
-}
-
-bool dfs(int v, int parent) {
+void dfs(int v, int parent) {
     visited[v] = 1;
     depth[v] = (parent == -1 ? 0 : depth[parent] + 1);
     up_depth[v] = depth[v];
 
-    for (int e : adj[v]) {
-        int to = neighbour(e);
+    for (auto& [to, e] : adj[v]) {
         if (to == parent) {
             continue;
         } else if (!visited[to]) {
-            if (!dfs(to, v))
-                return false;
+            dfs(to, v);
             up_depth[v] = min(up_depth[v], up_depth[to]);
             if (up_depth[to] > depth[v]) {
-                cout << v << " " << to << "\n";
-                return false;
+
             }
         } else {
             up_depth[v] = min(up_depth[v], depth[to]);
         }
     }
-
-    return true;
-}
-
-void dfs2() {
-
 }
 
 int main() {
@@ -56,26 +39,30 @@ int main() {
     int n, m;
     cin >> n >> m;
 
-    adj.resize(n + 1);
-    visited.resize(n + 1);
-    depth.resize(n + 1);
-    up_depth.resize(n + 1);
+    adj.resize(n);
 
     for (int i = 0; i < m; ++i) {
         int u, v;
         cin >> u >> v;
-        edges.emplace_back(Edge{u, v, i});
-        adj[u].push_back(i);
-        adj[v].push_back(i);
+        --u, --v;
+        if (u != v) {
+            adj[u].emplace_back(v, i + 1);
+            adj[v].emplace_back(u, i + 1);
+        }
     }
 
-    if (!dfs(1, -1)) {
-        cout << "0\n";
-        return 0;
+    for (auto& lst : adj) {
+        sort(lst.begin(), lst.end());
     }
 
-    cout << "VSE NORMAS\n";
+    visited.resize(n, 0);
+    depth.resize(n, 0);
+    up_depth.resize(n, 0);
 
+    for (int v = 0; v < n; v++)
+        if (!visited[v])
+            dfs(v, -1);
+        
 
     return 0;
 }
