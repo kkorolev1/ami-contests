@@ -1,34 +1,75 @@
 #include <iostream>
 #include <vector>
-#include <set>
+#include <unordered_map>
 #include <algorithm>
 
 using namespace std;
 
-using Edge = pair<int, int>;
-vector<vector<Edge>> adj;
+struct Edge {
+    int u, v;
+
+    int other(int vertex) {
+        return vertex == u ? v : u;
+    }
+
+    void orient(int from) {
+        if (from == v)
+            swap(u, v);
+    }
+
+    bool operator==(const Edge& other) const {
+        return (u == other.u && v == other.v) || (u == other.v && v == other.u);
+    }
+
+    size_t operator()(const Edge& e) const {
+        return hash<int>()(e.u) ^ hash<int>()(e.v);
+    }
+};
+
+vector<Edge> edges;
+unordered_map<Edge, int, Edge> edges_counter;
+vector<vector<int>> adj;
 vector<int> visited;
 vector<int> depth;
 vector<int> up_depth;
 
-void dfs(int v, int parent) {
+bool dfs(int v, int parent) {
     visited[v] = 1;
     depth[v] = (parent == -1 ? 0 : depth[parent] + 1);
     up_depth[v] = depth[v];
 
-    for (auto& [to, e] : adj[v]) {
+    for (int edge_idx : adj[v]) {
+        auto& e = edges[edge_idx];
+        int to = e.other(v);
         if (to == parent) {
             continue;
         } else if (!visited[to]) {
-            dfs(to, v);
-            up_depth[v] = min(up_depth[v], up_depth[to]);
-            if (up_depth[to] > depth[v]) {
 
+            if (edges_counter[e] > 1) {
+                e.orient(to);
+            } else {
+                e.orient(v);
             }
-        } else {
+
+            if (!dfs(to, v)) {
+                return false;
+            }
+
+            up_depth[v] = min(up_depth[v], up_depth[to]);
+
+            if (up_depth[to] > depth[v]) {
+                return false;
+            }
+
+        } else if (visited[to] == 1) {
+            e.orient(v);
             up_depth[v] = min(up_depth[v], depth[to]);
         }
     }
+
+    visited[v] = 2;
+
+    return true;
 }
 
 int main() {
@@ -45,24 +86,26 @@ int main() {
         int u, v;
         cin >> u >> v;
         --u, --v;
-        if (u != v) {
-            adj[u].emplace_back(v, i + 1);
-            adj[v].emplace_back(u, i + 1);
-        }
-    }
-
-    for (auto& lst : adj) {
-        sort(lst.begin(), lst.end());
+        Edge e{u, v};
+        edges.push_back(e);
+        ++edges_counter[e];
+        adj[u].push_back(edges.size() - 1);
+        adj[v].push_back(edges.size() - 1);
     }
 
     visited.resize(n, 0);
     depth.resize(n, 0);
     up_depth.resize(n, 0);
 
-    for (int v = 0; v < n; v++)
-        if (!visited[v])
-            dfs(v, -1);
-        
+
+    if (!dfs(0, -1)) {
+        cout << "0\n";
+        return 0;
+    }
+
+    for (auto& e : edges) {
+        cout << e.u + 1 << " " << e.v + 1 << "\n";
+    }
 
     return 0;
 }
