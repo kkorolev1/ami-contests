@@ -27,7 +27,7 @@ struct Edge {
 };
 
 vector<Edge> edges;
-unordered_map<Edge, int, Edge> edges_counter;
+unordered_map<Edge, vector<int>, Edge> edges_mp;
 vector<vector<int>> adj;
 vector<int> visited;
 vector<int> depth;
@@ -44,21 +44,26 @@ bool dfs(int v, int parent) {
         if (to == parent) {
             continue;
         } else if (!visited[to]) {
-
-            if (edges_counter[e] > 1) {
-                e.orient(to);
-            } else {
-                e.orient(v);
-            }
-
             if (!dfs(to, v)) {
                 return false;
             }
 
             up_depth[v] = min(up_depth[v], up_depth[to]);
 
-            if (up_depth[to] > depth[v]) {
-                return false;
+            if (edges_mp[e].size() > 1) {
+                auto [a, b] = make_pair(v, to);
+
+                for (int edge_jdx : edges_mp[e]) {
+                    edges[edge_jdx].orient(a);
+                    swap(a, b);
+                }
+
+            } else {
+                if (up_depth[to] > depth[v]) {
+                    return false;
+                }
+
+                e.orient(v);
             }
 
         } else if (visited[to] == 1) {
@@ -80,31 +85,30 @@ int main() {
     int n, m;
     cin >> n >> m;
 
-    adj.resize(n);
+    adj.resize(n + 1);
 
     for (int i = 0; i < m; ++i) {
         int u, v;
         cin >> u >> v;
-        --u, --v;
         Edge e{u, v};
         edges.push_back(e);
-        ++edges_counter[e];
-        adj[u].push_back(edges.size() - 1);
-        adj[v].push_back(edges.size() - 1);
+        edges_mp[e].push_back(i);
+        adj[u].push_back(i);
+        adj[v].push_back(i);
     }
 
-    visited.resize(n, 0);
-    depth.resize(n, 0);
-    up_depth.resize(n, 0);
+    visited.resize(n + 1);
+    depth.resize(n + 1);
+    up_depth.resize(n + 1);
 
 
-    if (!dfs(0, -1)) {
+    if (!dfs(1, -1)) {
         cout << "0\n";
         return 0;
     }
 
     for (auto& e : edges) {
-        cout << e.u + 1 << " " << e.v + 1 << "\n";
+        cout << e.u << " " << e.v << "\n";
     }
 
     return 0;
