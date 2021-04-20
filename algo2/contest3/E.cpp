@@ -42,15 +42,19 @@ int main() {
         for (int u = 1; u <= n; ++u) {
             if (u == v || adj[v][u] == 0)
                 continue;
-            if (!visited[u]) {
+            if (u == finish) {
+                if (dist[v] + 1 < dist[finish]) {
+                    dist[finish] = dist[v] + 1;
+                    pre_finish.clear();
+                    pre_finish.insert(v);
+                } else if (dist[v] + 1 == dist[finish]) {
+                    pre_finish.insert(v);
+                }
+            } else if (!visited[u]) {
                 dist[u] = dist[v] + 1;
                 p[u] = v;
                 visited[u] = true;
                 q.push(u);
-            } else if (u == finish) {
-                if (dist[v] + 1 == dist[finish]) {
-                    pre_finish.insert(v);
-                }
             }
         }
     }
