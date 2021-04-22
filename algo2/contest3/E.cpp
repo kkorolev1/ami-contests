@@ -13,65 +13,77 @@ int main() {
     int n, m;
     cin >> n >> m;
 
-    using ll = long long;
-    vector<vector<ll>> adj(n + 1, vector<ll>(n + 1, 0));
+    struct Edge {
+        int a, b;
+
+        int other(int v) {
+            return v == a ? b : a;
+        }
+    };
+
+    vector<vector<int>> adj(n + 1);
     vector<bool> visited(n + 1);
-    vector<ll> dist(n + 1);
-    vector<ll> p(n + 1, -1);
-    unordered_set<ll> pre_finish;
+    vector<Edge> edges;
+
+    vector<int> ldist(n + 1);
+    vector<int> rdist(n + 1);
 
     for (int i = 0; i < m; ++i) {
         int u, v;
         cin >> u >> v;
-        ++adj[u][v];
-        ++adj[v][u];
+        edges.push_back(Edge{u, v});
+        adj[u].push_back(i);
+        adj[v].push_back(i);
     }
 
-    ll start, finish;
+    int start, finish;
     cin >> start >> finish;
 
-    queue<ll> q;
+    queue<int> q;
     q.push(start);
     visited[start] = true;
-    dist[finish] = n + 1;
 
     while (!q.empty()) {
         int v = q.front();
         q.pop();
 
-        for (int u = 1; u <= n; ++u) {
-            if (u == v || adj[v][u] == 0)
-                continue;
-            if (u == finish) {
-                if (dist[v] + 1 < dist[finish]) {
-                    dist[finish] = dist[v] + 1;
-                    pre_finish.clear();
-                    pre_finish.insert(v);
-                } else if (dist[v] + 1 == dist[finish]) {
-                    pre_finish.insert(v);
-                }
-            } else if (!visited[u]) {
-                dist[u] = dist[v] + 1;
-                p[u] = v;
+        for (int idx : adj[v]) {
+            int u = edges[idx].other(v);
+            if (!visited[u]) {
+                ldist[u] = ldist[v] + 1;
                 visited[u] = true;
                 q.push(u);
             }
         }
     }
 
-    int edges = 0;
+    visited.assign(n + 1, false);
+    q.push(finish);
+    visited[finish] = true;
 
-    for (int v : pre_finish) {
-        edges += adj[v][finish];
+    while (!q.empty()) {
+        int v = q.front();
+        q.pop();
 
-        for (int u = v; p[u] != -1; u = p[u]) {
-            edges += adj[p[u]][u];
-            adj[p[u]][u] = 0;
-            adj[u][p[u]] = 0;
+        for (int idx : adj[v]) {
+            int u = edges[idx].other(v);
+            if (!visited[u]) {
+                rdist[u] = rdist[v] + 1;
+                visited[u] = true;
+                q.push(u);
+            }
         }
     }
 
-    cout << m - edges << "\n";
+    int red_edges = 0;
+
+    for (auto& e : edges) {
+        if ((ldist[e.a] + rdist[e.b] + 1 != ldist[finish]) && (ldist[e.b] + rdist[e.a] + 1 != rdist[start])) {
+            ++red_edges;
+        }
+    }
+
+    cout << red_edges << "\n";
 
     return 0;
 }
