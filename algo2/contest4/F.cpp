@@ -11,41 +11,37 @@ int main() {
     int n, k, s, f;
     cin >> n >> s >> f >> k;
 
-    using ll = long long;
-    const ll MAX_VALUE = 1e6 * n;
+    const int MAX_VALUE = 1e5 * n;
 
     struct Trip {
         int to, dep_time, arr_time;
     };
 
-    struct Edge {
-        int time
-    };
-
-    using Edge = pair<ll, int>;
     vector<vector<Trip>> g(n + 1);
-    vector<ll> dist(n + 1, MAX_VALUE);
+    vector<int> dist(n + 1, MAX_VALUE);
 
     for (int i = 0; i < k; ++i) {
         int from, dep_time, to, arr_time;
         cin >> from >> dep_time >> to >> arr_time;
+        g[from].push_back(Trip{to, dep_time, arr_time});
     }
 
     dist[s] = 0;
 
-    set<Edge> min_vs;
-    min_vs.emplace(0, s);
+    set<pair<int, int>> min_vs;
+
+    for (auto& trip : g[s])
+        min_vs.emplace(trip.dep_time, s);
 
     while (!min_vs.empty()) {
         auto [v_arr_time, v] = *min_vs.begin();
         min_vs.erase(min_vs.begin());
 
-        for (auto& [u, u_dep_time, u_arr_time] : g[v]) {
-            int dt = u_dep_time - v_arr_time;
-            if (dt >= 0 && dist[v] + dt < dist[u]) {
+        for (auto& [u, dep_time, arr_time] : g[v]) {
+            if (dep_time >= v_arr_time && arr_time < dist[u]) {
                 if (dist[u] != MAX_VALUE)
                     min_vs.erase({dist[u], u});
-                dist[u] = dist[v] + dt;
+                dist[u] = arr_time;
                 min_vs.emplace(dist[u], u);
             }
         }
