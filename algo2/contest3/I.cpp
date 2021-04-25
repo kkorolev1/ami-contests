@@ -1,8 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <unordered_map>
-#include <unordered_set>
 
 using namespace std;
 
@@ -11,85 +9,50 @@ int main() {
     ios::ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int n, m;
-    cin >> n >> m;
+    int h, w;
+    cin >> h >> w;
 
-    struct Vertex {
-        int station, line;
+    vector<vector<char>> field(h, vector<char>(w));
 
-        size_t operator()(const Vertex& v) const {
-            return hash<int>()(100 * v.station + line);
-        }
-
-        bool operator==(const Vertex& other) const {
-            return station == other.station && line == other.line;
-        }
-    };
-
-    vector<vector<int>> adj(n + 1);
-    unordered_map<int, vector<int>> lines;
-
-    for (int i = 0; i < m; ++i) {
-        int p;
-        cin >> p;
-        int x;
-        cin >> x;
-        lines[x].push_back(i);
-
-        for (int j = 1; j < p; ++j) {
-            int y;
-            cin >> y;
-            adj[x].push_back(y);
-            adj[y].push_back(x);
-            lines[y].push_back(i);
-            x = y;
+    for (int i = 0; i < h; ++i) {
+        for (int j = 0; j < w; ++j) {
+            cin >> field[i][j];
         }
     }
 
-    int a, b;
-    cin >> a >> b;
+    using Vec2 = pair<int, int>;
+    Vec2 start, finish;
+    cin >> start.first >> start.second >> finish.first >> finish.second;
+    --start.first, --start.second, --finish.first, --finish.second;
 
-    if (a == b) {
-        cout << 0 << "\n";
-        return 0;
-    }
+    vector<vector<bool>> visited(h, vector<bool>(w));
+    vector<int> dx = {-1, -1, -1, 0, 0, 1, 1, 1};
+    vector<int> dy = {-1, 0, 1, -1, 1, -1, 0, 1};
 
-    queue<Vertex> q;
-    const int MAX_VALUE = numeric_limits<int>::max();
-    vector<bool> visited(n + 1);
-    vector<int> d(n + 1, MAX_VALUE);
-    int ans = MAX_VALUE;
-
-    for (int line : lines[a]) {
-        Vertex v{a, line};
-        q.push(v);
-    }
-
-    visited[a] = true;
-    d[a] = 0;
+    queue<Vec2> q;
+    q.push(start);
 
     while (!q.empty()) {
-        auto v = q.front();
+        auto [x, y] = q.front();
         q.pop();
 
-        for (int to_station : adj[v.station]) {
-            if (!visited[to_station]) {
-                for (int line : lines[to_station]) {
-                    Vertex u{to_station, line};
-                    d[to_station] = min(d[to_station], d[v.station] + (v.line != line));
+        if (x == finish.first && y == finish.second) {
+            cout << "found\n";
+            continue;
+        }
 
-                    if (to_station == b) {
-                        ans = min(ans, d[to_station]);
-                    } else {
-                        q.push(u);
-                    }
-                }
-                visited[to_station] = true;
+        for (int d = 0; d < 8; ++d) {
+            int ty = y + dy[d];
+            int tx = x + dx[d];
+
+            if (tx >= 0 && tx < w && ty >= 0 && ty < h && field[ty][tx] != 'X' && !visited[ty][tx]) {
+                visited[ty][tx] = true;
+
+
+                q.push({tx, ty});
             }
         }
     }
-
-    cout << (ans != MAX_VALUE ? ans : -1) << "\n";
 
     return 0;
 }

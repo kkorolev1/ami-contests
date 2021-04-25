@@ -2,6 +2,8 @@
 #include <vector>
 #include <queue>
 #include <map>
+#include <set>
+#include <algorithm>
 
 using namespace std;
 
@@ -10,50 +12,58 @@ int main() {
     ios::ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int n, k;
-    cin >> n >> k;
+    int num_halls, num_tunnels;
+    cin >> num_halls >> num_tunnels;
 
-    vector<vector<int>> adj(n + 1);
+    vector<vector<int>> adj(num_halls + 1);
 
-    for (int i = 0; i < k; ++i) {
+    for (int i = 0; i < num_tunnels; ++i) {
         int u, v;
         cin >> u >> v;
         adj[u].push_back(v);
         adj[v].push_back(u);
     }
 
-    int m;
-    cin >> m;
+    int num_robots;
+    cin >> num_robots;
 
-    using Vertex = vector<int>;
+    using ll = long long;
+    const ll INF = numeric_limits<ll>::max();
 
-    queue<Vertex> q;
-    map<Vertex, bool> visited;
-    map<Vertex, int> d;
+    queue<int> q;
+    vector<vector<bool>> visited;
+    vector<vector<ll>> d(num_halls + 1, vector<ll>(INF));
+    long long ans = INF;
 
-    Vertex start(m);
-
-    for (int i = 0; i < m; ++i) {
-        cin >> start[i];
+    for (int i = 0; i < num_robots; ++i) {
+        int hall;
+        cin >> hall;
+        visited[hall][]
+        d[start] = 0;
+        q.push(hall);
     }
-
-    visited[start] = true;
-    d[start] = 0;
-
 
     while (!q.empty()) {
         auto v = q.front();
         q.pop();
 
-        Vertex u(m);
+        Vertex u(num_robots);
+        tick(v, u, 0, [&]() {
+            if (visited.find(u) == visited.end()) {
+                visited.insert(u);
+                d[u] = d[v] + 1;
 
-        for (int i = 0; i < m; ++i) {
-            for (int to : adj[v[i]]) {
-
+                if (all_of(u.begin(), u.end(), [&](int x) { return x == u.back(); })) {
+                    ans = min(ans, d[u]);
+                } else {
+                    q.push(u);
+                }
             }
-        }
+        });
+
     }
 
+    cout << (ans != INF ? ans : -1) << "\n";
 
     return 0;
 }
