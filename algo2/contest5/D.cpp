@@ -1,40 +1,39 @@
 #include <iostream>
 #include <vector>
-#include <iomanip>
 using namespace std;
 
 int main() {
-    freopen("input.txt", "r", stdin);
+    cin.tie(nullptr);
+    ios::ios_base::sync_with_stdio(false);
+    //freopen("input.txt", "r", stdin);
 
     int n, m;
     cin >> n >> m;
 
     int s, e;
     cin >> s >> e;
+    --s, --e;
 
+    vector<vector<double>> d(n, vector<double>(n, 0));
 
-    vector<vector<double>> d(n + 1, vector<double>(n + 1, 0));
-
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < m; ++i) {
         int u, v;
         double p;
         cin >> u >> v >> p;
-        d[u][v] = max(d[u][v], (100 - p) / 100);
-        d[v][u] = max(d[v][u], (100 - p) / 100);
+        --u, --v;
+        d[u][v] = 1 - p / 100.0;
+        d[v][u] = 1 - p / 100.0;
     }
 
-    for (int k = 1; k <= n; ++k) {
-        for (int u = 1; u <= n; ++u) {
-            for (int v = 1; v <= n; ++v) {
-                if (d[u][v] < d[u][k] * d[k][v]) {
-                    d[u][v] = d[u][k] * d[k][v];
-                }
+    for (int k = 0; k < n; ++k) {
+        for (int u = 0; u < n; ++u) {
+            for (int v = 0; v < n; ++v) {
+                d[u][v] = max(d[u][v], d[u][k] * d[k][v]);
             }
         }
     }
 
-    double ans = 1 - d[s][e];
-    cout << setprecision(3) << ans << "\n";
+    cout << 1 - d[s][e] << "\n";
 
     return 0;
 }

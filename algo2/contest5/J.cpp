@@ -3,31 +3,65 @@
 #include <unordered_set>
 using namespace std;
 
+struct Edge {
+    int u, v, w;
+
+    int other(int x) {
+        return x == u ? v : u;
+    }
+};
+
+vector<bool> visited;
+vector<vector<int>> adj;
+vector<Edge> edges;
+vector<int> in, out;
+int n, m;
+int t = 0;
+
+void dfs(int v) {
+    visited[v] = true;
+    in[v] = ++t;
+
+    if (v != n - 1) {
+        for (int idx : adj[v]) {
+            int u = edges[idx].other(v);
+            if (!visited[u]) {
+                dfs(u);
+            }
+        }
+    }
+
+    out[v] = ++t;
+}
+
 int main() {
     cin.tie(nullptr);
     ios::ios_base::sync_with_stdio(false);
     freopen("input.txt", "r", stdin);
 
-    int n, m;
     cin >> n >> m;
 
-    struct Edge {
-        int u, v, w;
-    };
-
     const long long INF = numeric_limits<long long>::min();
-    vector<long long> d(n + 1, INF);
-    vector<Edge> edges(m);
-    vector<int> p(n + 1, -1);
+    vector<long long> d(n, INF);
+    vector<int> p(n, -1);
+
+    adj.resize(n);
+    visited.resize(n);
+    in.resize(n);
+    out.resize(n);
+    edges.resize(m);
 
     for (int i = 0; i < m; ++i) {
-        cin >> edges[i].u >> edges[i].v >> edges[i].w;
+        auto& [u, v, w] = edges[i];
+        cin >> u >> v >> w;
+        --u, --v;
+        adj[u].push_back(i);
     }
 
-    d[1] = 0;
+    d[0] = 0;
 
     for (int step = 0; step < n; ++step) {
-        int impr_v = 0;
+        int impr_v = -1;
 
         for (auto& [u, v, w] : edges) {
             if (d[u] != INF && d[v] < d[u] + w) {
@@ -37,27 +71,29 @@ int main() {
             }
         }
 
-        if (!impr_v)
+        if (impr_v == -1)
             break;
         else if (step + 1 == n) {
-            int v = impr_v;
             unordered_set<int> xs;
 
-            for (int i = 0; i < n; ++i, v = p[v]) {
-                xs.insert(v);
+            while (xs.find(impr_v) == xs.end()) {
+                xs.insert(impr_v);
+                impr_v = p[impr_v];
             }
 
-            if (xs.find(1) != xs.end() && xs.find(n) != xs.end()) {
+            dfs(0);
+
+            if (visited[impr_v] && visited[n - 1] && in[impr_v] <= in[n - 1] && out[impr_v] >= out[n - 1]) {
                 cout << ":)\n";
                 return 0;
             }
         }
     }
 
-    if (d[n] == INF) {
+    if (d[n - 1] == INF) {
         cout << ":(\n";
     } else {
-        cout << d[n] << "\n";
+        cout << d[n - 1] << "\n";
     }
 
     return 0;
