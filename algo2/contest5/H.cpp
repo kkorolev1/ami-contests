@@ -16,26 +16,28 @@ int main() {
 
     int a, b;
     cin >> a >> b;
+    --a, --b;
 
     int k;
     cin >> k;
 
     const int MAX_VALUE = numeric_limits<int>::max();
-    vector<long long> d(n + 1, MAX_VALUE);
+    vector<long long> d(n, MAX_VALUE);
     vector<Trip> trips(k);
 
     for (int i = 0; i < k; ++i) {
-        auto& t = trips[i];
-        cin >> t.from >> t.dep >> t.to >> t.arr;
+        auto& [from, dep, to, arr] = trips[i];
+        cin >> from >> dep >> to >> arr;
+        --from, --to;
     }
 
     d[a] = 0;
 
-    for (int step = 0; step < n; ++step) {
+    for (int step = 0; step < k; ++step) {
         bool impr = false;
 
         for (auto& [from, dep, to, arr] : trips) {
-            if (d[from] >= dep && d[to] > arr) {
+            if (d[from] <= dep && d[to] > arr) {
                 d[to] = arr;
                 impr = true;
             }
