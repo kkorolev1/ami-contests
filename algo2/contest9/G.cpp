@@ -1,86 +1,84 @@
 #include <iostream>
 #include <vector>
-#include <iomanip>
 using namespace std;
 
 using ll = long long;
+const int MAX_N = 2 * 1e5;
+const int INF = numeric_limits<int>::max();
 
-ll nearest_pow_2(ll x) {
-    return 1 << (32 - __builtin_clz(x - 1));
+struct Vertex {
+    int prefix, suffix, sum, ans;
+
+    Vertex(int value = 0) : prefix(max(0,value)), suffix(max(0,value)), sum(value), ans(max(0,value)) {}
+};
+
+Vertex t[4 * MAX_N];
+
+int transform(int x) {
+    return (abs(x)+1) % 2;
 }
 
-vector<ll> st;
-vector<ll> vals;
-int n;
-
-void modify(int p, int value) {
-    vals[p + n] = value;
-    value = (abs(value)+1)%2;
-
-    for (st[p += n] = value; p > 1; p >>= 1)
-        st[p>>1] = st[p] + st[p^1];
+Vertex combine(const Vertex& l, const Vertex& r) {
+    Vertex v;
+    v.sum = l.sum + r.sum;
+    v.prefix = max(l.prefix, l.sum + r.prefix);
+    v.suffix = max(r.suffix, r.sum + l.suffix);
+    v.ans = max(max(l.ans, r.ans), l.suffix + r.prefix);
+    return v;
 }
 
-ll sum(int l, int r) {
-    ll res = 0;
-    for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
-        if (l&1)
-            res += st[l++];
-        if (r&1)
-            res += st[--r];
+void build(vector<int>& a, int v, int vl, int vr) {
+    if (vl == vr) {
+        t[v] = Vertex(transform(a[vl]));
+    } else {
+        int vm = (vl + vr) / 2;
+        build(a, v*2, vl, vm);
+        build(a, v*2+1, vm+1, vr);
+        t[v] = combine(t[v*2], t[v*2+1]);
     }
-    return res;
 }
 
-pair<int, bool> kth(int k) {
-    int p = 1;
-    while (p < n) {
-        if (k <= st[2*p]) {
-            p = 2*p;
-        } else {
-            k -= st[2*p];
-            p = 2*p+1;
-        }
+void update(int v, int vl, int vr, int index, int x) {
+    if (vl == vr) {
+        t[v] = Vertex(transform(x));
+        return;
     }
 
-    return {p, st[p] == k};
+    int tm = (vl + vr) / 2;
+    if (index <= tm)
+        update(v*2, vl, tm, index, x);
+    else
+        update(v*2+1, tm+1, vr, index, x);
+    t[v] = combine(t[v*2], t[v*2+1]);
 }
 
-ll max_evens(int l, int r) {
-    
-}
-
-void print() {
-    for (int i = 0; i < 2 * n; ++i)
-        cout << setw(2) << i << " ";
-    cout << "\n";
-    for (int x : st)
-        cout << setw(2) << x << " ";
-    cout << "\n";
+Vertex max_evens(int v, int vl, int vr, int ql, int qr) {
+    if (ql == vl && vr == qr)
+        return t[v];
+    int tm = (vl + vr) / 2;
+    if (qr <= tm)
+        return max_evens(v*2, vl, tm, ql, qr);
+    if (ql > tm)
+        return max_evens(v*2+1, tm+1, vr, ql, qr);
+    return combine(max_evens(v*2, vl, tm, ql, tm),
+            max_evens(v*2+1, tm+1, vr, tm+1, qr));
 }
 
 int main() {
     ios::ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
-    // freopen("input.txt", "r", stdin);
+    freopen("input.txt", "r", stdin);
 
-    int n0;
-    cin >> n0;
+    int n;
+    cin >> n;
 
-    n = nearest_pow_2(n0);
-    st.resize(2 * n);
-    vals.resize(2 * n);
+    vector<int> a(n);
 
-    for (int i = 0; i < n0; ++i) {
-        cin >> vals[i+n];
-        st[i+n] = (abs(vals[i+n])+1)%2;
+    for (int i = 0; i < n; ++i) {
+        cin >> a[i];
     }
 
-    for (int i = n - 1; i > 0; --i) {
-        st[i] = st[2*i] + st[2*i+1];
-    }
-
-    // print();
+    build(a, 1, 0, n-1);
 
     int q;
     cin >> q;
@@ -92,12 +90,11 @@ int main() {
         if (cmd == 1) {
             int l, r;
             cin >> l >> r;
-            cout << max_evens(l, r);
+            cout << max_evens(1, 0, n-1, l, r).ans << "\n";
         } else {
             int index, x;
             cin >> index >> x;
-            modify(index, x);
-            // print();
+            update(1, 0, n-1, index, x);
         }
     }
 
