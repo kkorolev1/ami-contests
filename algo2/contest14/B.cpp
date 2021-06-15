@@ -8,7 +8,7 @@ using Vec2 = pair<int, int>;
 int main() {
     ios::ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
-    freopen("input.txt", "r", stdin);
+    // freopen("input.txt", "r", stdin);
 
     int n;
     cin >> n;
@@ -19,8 +19,6 @@ int main() {
     for (int i = 0; i < n; ++i) {
         cin >> points[i].first >> points[i].second;
     }
-
-    sort(points.begin(), points.end());
 
     for (int i = 0; i < n - 1; ++i) {
         climb1[i+1] = climb1[i] + (points[i+1].second > points[i].second) * abs(points[i+1].second - points[i].second);
@@ -38,7 +36,7 @@ int main() {
         if (s <= f) {
             cout << climb1[f] - climb1[s] << "\n";
         } else {
-            cout << climb2[s] - climb2[f] << "\n";
+            cout << climb2[n-f-1] - climb2[n-s-1] << "\n";
         }
     }
 
